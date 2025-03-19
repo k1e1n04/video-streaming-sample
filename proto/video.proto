@@ -7,6 +7,7 @@ option go_package = "api/grpc/video";
 service VideoService {
   rpc UploadVideo (UploadVideoRequest) returns (UploadVideoResponse);
   rpc GetVideoURL (GetVideoRequest) returns (GetVideoResponse);
+  rpc ListVideos (ListVideosRequest) returns (ListVideosResponse);
 }
 
 message UploadVideoRequest {
@@ -24,4 +25,16 @@ message GetVideoRequest {
 
 message GetVideoResponse {
   string presigned_url = 1;
+}
+
+message ListVideosRequest {}
+
+message VideoInfo {
+  string video_id = 1;
+  string title = 2;
+  string created_at = 3;
+}
+
+message ListVideosResponse {
+  repeated VideoInfo videos = 1;
 }
