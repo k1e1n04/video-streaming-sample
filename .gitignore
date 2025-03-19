@@ -1,0 +1,13 @@
+/data
+/dynamodb
+.env
+
+# JetBrains
+.idea
+*.iml
+*.ipr
+*.iws
+.idea_modules
+
+# Node.js
+node_modules
