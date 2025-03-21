@@ -40,12 +40,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TIMESTAMP=$(date +"%Y%m%d-%H%M%S")  # ブランチ名を安全なフォーマットに
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "generate-grpc-code-${TIMESTAMP}" || git checkout "generate-grpc-code-${TIMESTAMP}"
           git add .
           git commit -m "Generate GRPC Code"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/k1e1n04/video-streaming-sample.git
           git push origin "generate-grpc-code-${TIMESTAMP}"
 
       - name: Create Pull Request
