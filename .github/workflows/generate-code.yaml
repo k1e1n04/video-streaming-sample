@@ -36,6 +36,8 @@ jobs:
           protoc --plugin=protoc-gen-ts=./frontend/node_modules/.bin/protoc-gen-ts --ts_out=./frontend/src/proto --proto_path=proto video.proto
 
       - name: Commit changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
           git config --local user.email "action@github.com"
