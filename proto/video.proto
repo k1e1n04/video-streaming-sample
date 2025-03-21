@@ -5,14 +5,16 @@ package video;
 option go_package = "api/adapter/grpc/video";
 
 service VideoService {
-  rpc UploadVideo (UploadVideoRequest) returns (UploadVideoResponse);
+  rpc UploadVideo (stream UploadVideoRequest) returns (UploadVideoResponse);
   rpc GetVideoURL (GetVideoRequest) returns (GetVideoResponse);
   rpc ListVideos (ListVideosRequest) returns (ListVideosResponse);
 }
 
 message UploadVideoRequest {
-  string title = 1;
-  bytes file = 2;
+  oneof data {
+    string title = 1; // in the first request, the title is sent
+    bytes chunk = 2;  // in the following requests, the video chunk is sent
+  }
 }
 
 message UploadVideoResponse {
