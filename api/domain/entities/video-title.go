@@ -21,14 +21,12 @@ func NewVideoTitle(
 		return nil, errors.NewBadRequestError(
 			"video title must not be empty",
 			"video title must not be empty",
-			nil,
 		)
 	}
 	if len(value) > videoTitleMaxLength {
 		return nil, errors.NewBadRequestError(
 			fmt.Sprintf("video title must be less than 100 characters: %s", value),
 			"video title must be less than 100 characters",
-			nil,
 		)
 	}
 	return &VideoTitle{

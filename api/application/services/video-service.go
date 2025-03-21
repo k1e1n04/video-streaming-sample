@@ -34,7 +34,7 @@ func (v *VideoService) Register(ctx context.Context, p parameter.RegisterVideoPa
 		return nil, err
 	}
 	id := metadata.ID()
-	if err := v.videoStorageRepository.Store(ctx, *id, p.Video); err != nil {
+	if err := v.videoStorageRepository.Store(ctx, *id, p.Video, "mp4"); err != nil {
 		return nil, err
 	}
 	if err := v.videoMetadataRepository.Register(ctx, *metadata); err != nil {
