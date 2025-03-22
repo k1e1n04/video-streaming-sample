@@ -40,6 +40,20 @@ jobs:
           restore-keys: |
             go-mod-${{ runner.os }}-
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
       - name: Cache Protoc
         id: cache-protoc
         uses: actions/cache@v4
@@ -109,6 +123,7 @@ jobs:
       - name: Generate GRPC Code for TypeScript
         run: |
           protoc --plugin=protoc-gen-ts=./frontend/node_modules/.bin/protoc-gen-ts --ts_out=./frontend/src/proto --proto_path=proto video.proto
+          cd frontend && yarn run fmt
 
       - name: Commit changes
         env:
