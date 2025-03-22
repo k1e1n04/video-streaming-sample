@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+	"net"
+
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/controllers"
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/grpc/video"
 	intercepter "github.com/k1e1n04/video-streaming-sample/api/adapter/interceptor"
 	"github.com/k1e1n04/video-streaming-sample/api/di"
-	"log"
-	"net"
 
 	"google.golang.org/grpc"
 )

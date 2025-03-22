@@ -2,6 +2,8 @@ package di
 
 import (
 	"context"
+	"os"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -14,7 +16,6 @@ import (
 	"github.com/k1e1n04/video-streaming-sample/api/env"
 	repositories2 "github.com/k1e1n04/video-streaming-sample/api/infra/repositories"
 	"go.uber.org/dig"
-	"os"
 )
 
 // Init is a function to initialize dependencies

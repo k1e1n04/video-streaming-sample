@@ -1,9 +1,10 @@
 package entities
 
 import (
+	"time"
+
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
 	"github.com/k1e1n04/video-streaming-sample/api/utils"
-	"time"
 )
 
 // VideoMetadataEntity is a video metadata entity

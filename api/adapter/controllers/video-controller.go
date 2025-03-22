@@ -3,14 +3,15 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"io"
+	"log"
+
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/grpc/video"
 	"github.com/k1e1n04/video-streaming-sample/api/application/parameter"
 	"github.com/k1e1n04/video-streaming-sample/api/application/services"
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
 	"github.com/k1e1n04/video-streaming-sample/api/utils"
 	"google.golang.org/grpc"
-	"io"
-	"log"
 )
 
 // VideoController is a video controller

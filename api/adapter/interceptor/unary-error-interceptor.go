@@ -2,8 +2,9 @@ package intercepter
 
 import (
 	"context"
-	"google.golang.org/grpc/status"
 	"log"
+
+	"google.golang.org/grpc/status"
 
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
 	"google.golang.org/grpc"

@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"github.com/oklog/ulid"
 	"math/rand"
 	"time"
+
+	"github.com/oklog/ulid"
 )
 
 // GenerateID is a function to generate an ID
