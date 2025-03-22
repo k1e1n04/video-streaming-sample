@@ -49,5 +49,5 @@ jobs:
           then
             git add -A
             git commit -m "Generate GRPC Code"
-            git push origin HEAD:${GITHUB_REF#refs/heads/}
+            git push origin
           fi
