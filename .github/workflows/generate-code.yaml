@@ -24,7 +24,7 @@ jobs:
           sudo apt-get install -y protobuf-compiler
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-          cd frontend && yarn install
+          cd frontend && yarn install --frozen-lockfile
           cd ..
 
       - name: Generate GRPC Code for Go
@@ -41,12 +41,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet; then
+          if ! git diff --quiet
+          then
             git add -A
             git commit -m "Generate GRPC Code"
-            git push
+            git push origin HEAD:${GITHUB_REF#refs/heads/}
           fi
-          
-      - name: Create Pull Request
-        run: |
-          gh pr create --title "Generate GRPC Code" --body "Generate GRPC Code" --base master --head "generate-grpc-code-${TIMESTAMP}"
