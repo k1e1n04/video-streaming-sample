@@ -29,7 +29,10 @@ message GetVideoResponse {
   string presigned_url = 1;
 }
 
-message ListVideosRequest {}
+message ListVideosRequest {
+  optional string last_evaluated_key = 1;
+  int32 limit = 2;
+}
 
 message VideoInfo {
   string video_id = 1;
@@ -39,4 +42,5 @@ message VideoInfo {
 
 message ListVideosResponse {
   repeated VideoInfo videos = 1;
+  optional string last_evaluated_key = 2;
 }
