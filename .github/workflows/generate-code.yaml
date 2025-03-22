@@ -29,14 +29,16 @@ jobs:
       - name: Install dependencies
         env:
           PROTOC_VERSION: 30.1
+          PROTOC_GEN_GO_VERSION: 1.36.5
+          PROTOC_GEN_GO_GRPC_VERSION: 1.5.1
         run: |
           PB_REL="https://github.com/protocolbuffers/protobuf/releases"
           curl -LO $PB_REL/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
           unzip protoc-$PROTOC_VERSION-linux-x86_64.zip -d $HOME/.local
           export PATH="$PATH:$HOME/.local/bin"
           rm -rf protoc-$PROTOC_VERSION-linux-x86_64.zip
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v$PROTOC_GEN_GO_VERSION
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$PROTOC_GEN_GO_GRPC_VERSION
           cd frontend && yarn install --frozen-lockfile
           cd ..
 
