@@ -3,10 +3,11 @@ package controllers
 import (
 	"bytes"
 	"context"
-	parameter2 "github.com/k1e1n04/video-streaming-sample/api/video/application/parameter"
-	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
 	"io"
 	"log"
+
+	parameter2 "github.com/k1e1n04/video-streaming-sample/api/video/application/parameter"
+	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
 
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/grpc/video"
 	"github.com/k1e1n04/video-streaming-sample/api/errors"

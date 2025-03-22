@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"github.com/k1e1n04/video-streaming-sample/api/shared/models"
 	"time"
+
+	"github.com/k1e1n04/video-streaming-sample/api/shared/models"
 
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
 	"github.com/k1e1n04/video-streaming-sample/api/utils"

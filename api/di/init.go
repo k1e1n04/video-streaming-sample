@@ -2,10 +2,11 @@ package di
 
 import (
 	"context"
+	"os"
+
 	"github.com/k1e1n04/video-streaming-sample/api/infra/repositories/video"
 	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
 	repositories2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
-	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
