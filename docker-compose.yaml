@@ -7,8 +7,6 @@ services:
     ports:
       - "8000:8000"
     command: [ "-jar", "DynamoDBLocal.jar", "-sharedDb" ]
-    volumes:
-      - ./dynamodb:/home/dynamodblocal/data
     working_dir: /home/dynamodblocal
     restart: always
   dynamodb-admin:
@@ -29,15 +27,28 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - ./data:/data
     command: server --console-address ":9001" /data
   redis:
     image: redis:latest
     container_name: video-streaming-redis
     ports:
       - "6379:6379"
-    volumes:
-      - ./redis-data:/data
     restart: always
     command: redis-server --appendonly yes
+  dynamodb-init:
+    image: amazon/aws-cli
+    volumes:
+      - ./scripts/dynamodb-init:/init
+    entrypoint: /init/init.sh
+    depends_on:
+      - dynamodb
+  s3-init:
+    image: amazon/aws-cli
+    volumes:
+      - ./scripts/s3-init:/init
+    environment:
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+    entrypoint: /init/init.sh
+    depends_on:
+      - minio
