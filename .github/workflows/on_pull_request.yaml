@@ -1,0 +1,144 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    paths:
+      - 'proto/**'
+      - 'frontend/**'
+      - 'api/**'
+  push:
+    branches:
+      - master
+    paths:
+      - 'proto/**'
+      - 'frontend/**'
+      - 'api/**'
+
+jobs:
+  test:
+    permissions:
+      contents: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-mod-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-mod-${{ runner.os }}-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      - name: Cache Protoc
+        id: cache-protoc
+        uses: actions/cache@v4
+        with:
+          path: $HOME/.local
+          key: protoc-${{ runner.os }}-30.1
+
+      - name: Install Protoc
+        if: steps.cache-protoc.outputs.cache-hit != 'true'
+        env:
+          PROTOC_VERSION: 30.1
+        run: |
+          PB_REL="https://github.com/protocolbuffers/protobuf/releases"
+          curl -LO $PB_REL/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
+          unzip protoc-$PROTOC_VERSION-linux-x86_64.zip -d $HOME/.local
+          rm -rf protoc-$PROTOC_VERSION-linux-x86_64.zip
+          echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Cache Protoc Plugins
+        id: cache-protoc-plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: protoc-plugins-${{ runner.os }}-1.36.5-1.5.1
+
+      - name: Install Protoc Plugins
+        if: steps.cache-protoc-plugins.outputs.cache-hit != 'true'
+        env:
+          PROTOC_GEN_GO_VERSION: 1.36.5
+          PROTOC_GEN_GO_GRPC_VERSION: 1.5.1
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v$PROTOC_GEN_GO_VERSION
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$PROTOC_GEN_GO_GRPC_VERSION
+
+      - name: Cache goimports
+        id: cache-goimports
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin/goimports
+          key: goimports-${{ runner.os }}-${{ env.GOIMPORTS_VERSION }}
+
+      - name: Install goimports
+        if: steps.cache-goimports.outputs.cache-hit != 'true'
+        env:
+          GOIMPORTS_VERSION: 0.31.0
+        run: go install golang.org/x/tools/cmd/goimports@v$GOIMPORTS_VERSION
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: |
+          cd frontend && yarn install --frozen-lockfile
+          cd ..
+
+      - name: Generate GRPC Code for Go
+        run: |
+          protoc --proto_path=./proto --go_out=. --go-grpc_out=. video.proto
+          goimports -w api
+
+      - name: Generate GRPC Code for TypeScript
+        run: |
+          protoc --plugin=protoc-gen-ts=./frontend/node_modules/.bin/protoc-gen-ts --ts_out=./frontend/src/proto --proto_path=proto video.proto
+          cd frontend && yarn run fmt
+
+      - name: Commit changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet
+          then
+            git add -A
+            git commit -m "gen grpc code and fmt"
+            git push
+          fi

@@ -1,9 +1,10 @@
 package env
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // ApplicationSetting is application setting
@@ -11,6 +12,10 @@ type ApplicationSetting struct {
 	env             string
 	awsRegion       string
 	videoBucketName string
+	// minioAccessKey is minio access key for local
+	minioAccessKey string
+	// minioSecretKey is minio secret key for local
+	minioSecretKey string
 }
 
 const LocalEnv = "local"

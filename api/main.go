@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/k1e1n04/video-streaming-sample/api/adapter/controllers"
-	"github.com/k1e1n04/video-streaming-sample/api/adapter/grpc/video"
-	"github.com/k1e1n04/video-streaming-sample/api/di"
 	"log"
 	"net"
+
+	"github.com/k1e1n04/video-streaming-sample/api/adapter/controllers"
+	"github.com/k1e1n04/video-streaming-sample/api/adapter/grpc/video"
+	intercepter "github.com/k1e1n04/video-streaming-sample/api/adapter/interceptor"
+	"github.com/k1e1n04/video-streaming-sample/api/di"
 
 	"google.golang.org/grpc"
 )
@@ -16,7 +18,9 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(intercepter.UnaryErrorInterceptor),
+	)
 	container := di.Init()
 
 	var vc controllers.VideoController

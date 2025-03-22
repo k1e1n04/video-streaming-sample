@@ -3,6 +3,7 @@ package repositories
 import (
 	"bytes"
 	"context"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -35,11 +36,12 @@ func NewVideoStorageRepositoryImpl(
 }
 
 // Store is a method to store video
-func (v *VideoStorageRepositoryImpl) Store(ctx context.Context, videoID entities2.VideoID, video []byte) error {
+func (v *VideoStorageRepositoryImpl) Store(ctx context.Context, videoID entities2.VideoID, video *bytes.Reader, extension string) error {
 	_, err := v.s3Uploader.Upload(ctx, &s3.PutObjectInput{
-		Bucket: aws.String(v.setting.VideoBucketName()),
-		Key:    aws.String(videoID.Value()),
-		Body:   bytes.NewReader(video),
+		Bucket:      aws.String(v.setting.VideoBucketName()),
+		ContentType: aws.String("video/mp4"),
+		Key:         aws.String(videoID.Value() + "." + extension),
+		Body:        video,
 	})
 	if err != nil {
 		return err

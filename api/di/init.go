@@ -1,7 +1,12 @@
 package di
 
 import (
+	"context"
+	"os"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -42,12 +47,26 @@ func initClient(container *dig.Container, setting *env.ApplicationSetting) {
 	cfg := aws.Config{
 		Region: setting.AWSRegion(),
 	}
+	if setting.Env() == env.LocalEnv {
+		var err error
+		cfg, err = config.LoadDefaultConfig(context.TODO(),
+			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+				os.Getenv("MINIO_ACCESS_KEY"), // access key
+				os.Getenv("MINIO_SECRET_KEY"), // secret key
+				"",
+			)),
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	err := container.Provide(func() *s3.Client {
 		var client *s3.Client
 		if setting.Env() == env.LocalEnv {
 			client = s3.NewFromConfig(cfg, func(o *s3.Options) {
 				o.BaseEndpoint = aws.String("http://localhost:9000")
+				o.UsePathStyle = true
 			})
 		} else {
 			client = s3.NewFromConfig(cfg)
