@@ -3,6 +3,8 @@ name: Generate GRPC Code
 on:
   pull_request:
     types: [ opened, synchronize, reopened ]
+    paths:
+      - 'proto/**'
   push:
     branches:
       - master
