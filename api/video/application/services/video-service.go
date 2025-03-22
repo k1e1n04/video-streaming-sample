@@ -3,25 +3,25 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/k1e1n04/video-streaming-sample/api/video/application/dto"
+	parameter2 "github.com/k1e1n04/video-streaming-sample/api/video/application/parameter"
+	entities2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
+	repositories2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
 
-	"github.com/k1e1n04/video-streaming-sample/api/application/dto"
 	"github.com/k1e1n04/video-streaming-sample/api/utils"
 
-	"github.com/k1e1n04/video-streaming-sample/api/application/parameter"
-	"github.com/k1e1n04/video-streaming-sample/api/domain/entities"
-	"github.com/k1e1n04/video-streaming-sample/api/domain/repositories"
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
 )
 
 type VideoService struct {
-	videoMetadataRepository repositories.VideoMetadataRepository
-	videoStorageRepository  repositories.VideoStorageRepository
+	videoMetadataRepository repositories2.VideoMetadataRepository
+	videoStorageRepository  repositories2.VideoStorageRepository
 }
 
 // NewVideoService is a constructor
 func NewVideoService(
-	videoMetadataRepository repositories.VideoMetadataRepository,
-	videoStorageRepository repositories.VideoStorageRepository,
+	videoMetadataRepository repositories2.VideoMetadataRepository,
+	videoStorageRepository repositories2.VideoStorageRepository,
 ) VideoService {
 	return VideoService{
 		videoMetadataRepository: videoMetadataRepository,
@@ -30,8 +30,8 @@ func NewVideoService(
 }
 
 // Register is a method to register video
-func (v *VideoService) Register(ctx context.Context, p parameter.RegisterVideoParameter) (*string, error) {
-	metadata, err := entities.NewVideoMetadataEntity(
+func (v *VideoService) Register(ctx context.Context, p parameter2.RegisterVideoParameter) (*string, error) {
+	metadata, err := entities2.NewVideoMetadataEntity(
 		p.Title,
 	)
 	if err != nil {
@@ -49,8 +49,8 @@ func (v *VideoService) Register(ctx context.Context, p parameter.RegisterVideoPa
 }
 
 // GetPresignedURLByVideoID is a method to get presigned URL by video ID
-func (v *VideoService) GetPresignedURLByVideoID(ctx context.Context, p parameter.GetPresignedURLParameter) (*string, error) {
-	id := entities.RestoreVideoID(p.VideoID)
+func (v *VideoService) GetPresignedURLByVideoID(ctx context.Context, p parameter2.GetPresignedURLParameter) (*string, error) {
+	id := entities2.RestoreVideoID(p.VideoID)
 	metadata, err := v.videoMetadataRepository.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (v *VideoService) GetPresignedURLByVideoID(ctx context.Context, p parameter
 }
 
 // GetVideoPage is a method to find page
-func (v *VideoService) GetVideoPage(ctx context.Context, p parameter.GetVideoPageParameter) (*utils.Pageable[dto.GetVideoPageDTO], error) {
+func (v *VideoService) GetVideoPage(ctx context.Context, p parameter2.GetVideoPageParameter) (*utils.Pageable[dto.GetVideoPageDTO], error) {
 	pageable, err := v.videoMetadataRepository.FindPage(ctx, p.Limit, p.LastEvaluatedKey)
 	if err != nil {
 		return nil, err

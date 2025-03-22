@@ -3,12 +3,12 @@ package repositories
 import (
 	"bytes"
 	"context"
+	entities2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
+	"github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	entities2 "github.com/k1e1n04/video-streaming-sample/api/domain/entities"
-	"github.com/k1e1n04/video-streaming-sample/api/domain/repositories"
 	"github.com/k1e1n04/video-streaming-sample/api/env"
 )
 

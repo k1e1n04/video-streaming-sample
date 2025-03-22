@@ -3,8 +3,7 @@ package repositories
 import (
 	"bytes"
 	"context"
-
-	"github.com/k1e1n04/video-streaming-sample/api/domain/entities"
+	"github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
 )
 
 // VideoStorageRepository is a video storage repository
