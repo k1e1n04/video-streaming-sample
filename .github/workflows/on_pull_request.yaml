@@ -1,15 +1,19 @@
-name: Generate GRPC Code
+name: Pull Request Workflow
 
 on:
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
       - 'proto/**'
+      - 'frontend/**'
+      - 'api/**'
   push:
     branches:
       - master
     paths:
       - 'proto/**'
+      - 'frontend/**'
+      - 'api/**'
 
 jobs:
   test:
