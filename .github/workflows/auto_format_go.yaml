@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'api/**'
 
 jobs:
     test:
