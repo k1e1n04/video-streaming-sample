@@ -75,6 +75,19 @@ jobs:
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v$PROTOC_GEN_GO_VERSION
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$PROTOC_GEN_GO_GRPC_VERSION
 
+      - name: Cache goimports
+        id: cache-goimports
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin/goimports
+          key: goimports-${{ runner.os }}-${{ env.GOIMPORTS_VERSION }}
+
+      - name: Install goimports
+        if: steps.cache-goimports.outputs.cache-hit != 'true'
+        env:
+          GOIMPORTS_VERSION: 0.31.0
+        run: go install golang.org/x/tools/cmd/goimports@v$GOIMPORTS_VERSION
+
       - name: Cache Node Modules
         uses: actions/cache@v4
         with:
@@ -91,6 +104,7 @@ jobs:
       - name: Generate GRPC Code for Go
         run: |
           protoc --proto_path=./proto --go_out=. --go-grpc_out=. video.proto
+          goimports -w api
 
       - name: Generate GRPC Code for TypeScript
         run: |
