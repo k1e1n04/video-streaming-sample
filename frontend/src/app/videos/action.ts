@@ -4,7 +4,7 @@ import GetVideoRequest = video.GetVideoRequest;
 import videoClient from "@/lib/grpcClient";
 import UploadVideoRequest = video.UploadVideoRequest;
 import ListVideosRequest = video.ListVideosRequest;
-import {VideoListResponse} from "@/app/videos/_types/VideoListResponse";
+import { VideoListResponse } from "@/app/videos/_types/VideoListResponse";
 
 /**
  * Get video URL
@@ -50,19 +50,19 @@ export const getVideoList = async (lastEvaluatedId?: string) => {
         reject(new Error("No response"));
         return;
       }
-        const videos = response.videos.map((video) => ({
-            id: video.video_id,
-            title: video.title,
-            createdAt: video.created_at,
-        }));
-        const result: VideoListResponse = {
-          videos,
-          lastEvaluatedId: response._last_evaluated_key,
-        };
+      const videos = response.videos.map((video) => ({
+        id: video.video_id,
+        title: video.title,
+        createdAt: video.created_at,
+      }));
+      const result: VideoListResponse = {
+        videos,
+        lastEvaluatedId: response._last_evaluated_key,
+      };
       resolve(result);
     });
   });
-}
+};
 
 /**
  * Upload video
