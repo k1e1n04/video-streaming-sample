@@ -91,3 +91,51 @@ func (r *VideoMetadataRepositoryImpl) FindByID(ctx context.Context, videoID enti
 	}
 	return video, nil
 }
+
+// FindPage is a method to find all video metadata
+func (r *VideoMetadataRepositoryImpl) FindPage(ctx context.Context, limit int32, lastEvaluatedKey *string) (*utils.Pageable[entities2.VideoMetadataEntity], error) {
+	var videos []entities2.VideoMetadataEntity
+	var lastEvaluatedKeyMap map[string]types.AttributeValue
+
+	if lastEvaluatedKey != nil {
+		lastEvaluatedKeyMap = map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: *lastEvaluatedKey},
+		}
+	}
+
+	result, err := r.dynamodbClient.Scan(ctx, &dynamodb.ScanInput{
+		TableName:            aws.String(records.VideoMetadataTableName),
+		Limit:                aws.Int32(int32(limit)),
+		ExclusiveStartKey:    lastEvaluatedKeyMap,
+		ProjectionExpression: aws.String("id, title, created_at"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range result.Items {
+		var record records.VideoMetadata
+		err = attributevalue.UnmarshalMap(item, &record)
+		if err != nil {
+			return nil, err
+		}
+
+		video, err := r.toEntity(record)
+		if err != nil {
+			return nil, err
+		}
+		videos = append(videos, *video)
+	}
+
+	// get lastEvaluatedKey
+	var lastEvaluatedKeyStr *string
+	if result.LastEvaluatedKey != nil {
+		if val, ok := result.LastEvaluatedKey["id"].(*types.AttributeValueMemberS); ok {
+			lastEvaluatedKeyStr = &val.Value
+		}
+	} else {
+		lastEvaluatedKeyStr = nil
+	}
+
+	return utils.NewPageable(videos, lastEvaluatedKeyStr), nil
+}

@@ -53,7 +53,7 @@ func (v *VideoStorageRepositoryImpl) Store(ctx context.Context, videoID entities
 func (v *VideoStorageRepositoryImpl) GetPresignedURLByVideoID(ctx context.Context, videoID entities2.VideoID) (string, error) {
 	presignedURL, err := s3.NewPresignClient(v.s3Client).PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(v.setting.VideoBucketName()),
-		Key:    aws.String(videoID.Value()),
+		Key:    aws.String(videoID.Value() + ".mp4"),
 	})
 	if err != nil {
 		return "", err
