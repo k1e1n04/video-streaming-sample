@@ -139,6 +139,6 @@ jobs:
           if ! git diff --quiet
           then
             git add -A
-            git commit -m "Generate GRPC Code"
+            git commit -m "gen grpc code and fmt"
             git push
           fi
