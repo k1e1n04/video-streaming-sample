@@ -1,9 +1,10 @@
 package env
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 // ApplicationSetting is application setting

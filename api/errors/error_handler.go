@@ -2,9 +2,10 @@ package errors
 
 import (
 	"errors"
+	"log"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"log"
 )
 
 // ErrorHandler is a function to handle errors
