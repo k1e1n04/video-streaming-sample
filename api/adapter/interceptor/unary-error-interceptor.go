@@ -18,6 +18,8 @@ func UnaryErrorInterceptor(
 	handler grpc.UnaryHandler,
 ) (interface{}, error) {
 
+	log.Printf("Called FullMethod: %s", info.FullMethod)
+
 	resp, err := handler(ctx, req)
 
 	if err != nil {

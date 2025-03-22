@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k1e1n04/video-streaming-sample/api/application/dto"
+	"github.com/k1e1n04/video-streaming-sample/api/utils"
+
 	"github.com/k1e1n04/video-streaming-sample/api/application/parameter"
 	"github.com/k1e1n04/video-streaming-sample/api/domain/entities"
 	"github.com/k1e1n04/video-streaming-sample/api/domain/repositories"
@@ -64,4 +67,26 @@ func (v *VideoService) GetPresignedURLByVideoID(ctx context.Context, p parameter
 		return nil, err
 	}
 	return &url, nil
+}
+
+// GetVideoPage is a method to find page
+func (v *VideoService) GetVideoPage(ctx context.Context, p parameter.GetVideoPageParameter) (*utils.Pageable[dto.GetVideoPageDTO], error) {
+	pageable, err := v.videoMetadataRepository.FindPage(ctx, p.Limit, p.LastEvaluatedKey)
+	if err != nil {
+		return nil, err
+	}
+
+	var dtos []dto.GetVideoPageDTO
+	for _, metadata := range pageable.Content() {
+		dtos = append(dtos, dto.GetVideoPageDTO{
+			ID:        metadata.ID().Value(),
+			Title:     metadata.Title().Value(),
+			CreatedAt: metadata.CreatedAt(),
+		})
+	}
+
+	return utils.NewPageable(
+		dtos,
+		pageable.LastEvaluatedKey(),
+	), nil
 }

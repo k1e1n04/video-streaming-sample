@@ -28,7 +28,7 @@ yarn install
 
 #### Go
 ```bash
-protoc --proto_path=./proto \                                             
+protoc --proto_path=./proto \
   --go_out=. --go-grpc_out=. video.proto
 ```
 

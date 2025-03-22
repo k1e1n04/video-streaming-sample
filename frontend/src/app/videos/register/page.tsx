@@ -2,6 +2,10 @@
 import { useState } from "react";
 import { uploadVideo } from "@/app/videos/action";
 
+/**
+ * Video upload page
+ * @constructor
+ */
 export default function Page() {
   const [title, setTitle] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -39,7 +43,7 @@ export default function Page() {
       />
       <input
         type="file"
-        accept="video/*"
+        accept=".mp4"
         onChange={(e) => setFile(e.target.files?.[0] || null)}
         className="w-full px-3 py-2 border rounded mb-3"
       />

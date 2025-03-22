@@ -110,3 +110,28 @@ func (v *VideoController) GetVideoURL(ctx context.Context, req *video.GetVideoRe
 		PresignedUrl: *url,
 	}, nil
 }
+
+// ListVideos is a method to list videos
+func (v *VideoController) ListVideos(ctx context.Context, req *video.ListVideosRequest) (*video.ListVideosResponse, error) {
+	videoPage, err := v.videoService.GetVideoPage(ctx, parameter.GetVideoPageParameter{
+		Limit:            req.Limit,
+		LastEvaluatedKey: req.LastEvaluatedKey,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*video.VideoInfo, 0, len(videoPage.Content()))
+	for _, videoMetadata := range videoPage.Content() {
+		res = append(res, &video.VideoInfo{
+			VideoId:   videoMetadata.ID,
+			Title:     videoMetadata.Title,
+			CreatedAt: utils.ToDateTimeString(videoMetadata.CreatedAt),
+		})
+	}
+
+	return &video.ListVideosResponse{
+		Videos:           res,
+		LastEvaluatedKey: videoPage.LastEvaluatedKey(),
+	}, nil
+}

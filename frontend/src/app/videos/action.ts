@@ -3,6 +3,8 @@ import { video } from "@/proto/video";
 import GetVideoRequest = video.GetVideoRequest;
 import videoClient from "@/lib/grpcClient";
 import UploadVideoRequest = video.UploadVideoRequest;
+import ListVideosRequest = video.ListVideosRequest;
+import { VideoListResponse } from "@/app/videos/_types/VideoListResponse";
 
 /**
  * Get video URL
@@ -28,8 +30,43 @@ export const getVideoURL = async (videoId: string) => {
 };
 
 /**
+ * Get video list
+ * @param lastEvaluatedId
+ */
+export const getVideoList = async (lastEvaluatedId?: string) => {
+  return new Promise<VideoListResponse>((resolve, reject) => {
+    const request = new ListVideosRequest();
+    if (lastEvaluatedId) {
+      request.last_evaluated_key = lastEvaluatedId;
+    }
+    request.limit = 10;
+
+    videoClient.ListVideos(request, {}, (err, response) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      if (!response) {
+        reject(new Error("No response"));
+        return;
+      }
+      const videos = response.videos.map((video) => ({
+        id: video.video_id,
+        title: video.title,
+        createdAt: video.created_at,
+      }));
+      const result: VideoListResponse = {
+        videos,
+        lastEvaluatedId: response._last_evaluated_key,
+      };
+      resolve(result);
+    });
+  });
+};
+
+/**
  * Upload video
- * @param file
+ * @param fileBuffer
  * @param title
  */
 export const uploadVideo = async (

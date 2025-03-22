@@ -375,8 +375,16 @@ export namespace video {
     }
   }
   export class ListVideosRequest extends pb_1.Message {
-    #one_of_decls: number[][] = [];
-    constructor(data?: any[] | {}) {
+    #one_of_decls: number[][] = [[1]];
+    constructor(
+      data?:
+        | any[]
+        | ({
+            limit?: number;
+          } & {
+            last_evaluated_key?: string;
+          }),
+    ) {
       super();
       pb_1.Message.initialize(
         this,
@@ -387,20 +395,74 @@ export namespace video {
         this.#one_of_decls,
       );
       if (!Array.isArray(data) && typeof data == "object") {
+        if (
+          "last_evaluated_key" in data &&
+          data.last_evaluated_key != undefined
+        ) {
+          this.last_evaluated_key = data.last_evaluated_key;
+        }
+        if ("limit" in data && data.limit != undefined) {
+          this.limit = data.limit;
+        }
       }
     }
-    static fromObject(data: {}): ListVideosRequest {
+    get last_evaluated_key() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set last_evaluated_key(value: string) {
+      pb_1.Message.setOneofField(this, 1, this.#one_of_decls[0], value);
+    }
+    get has_last_evaluated_key() {
+      return pb_1.Message.getField(this, 1) != null;
+    }
+    get limit() {
+      return pb_1.Message.getFieldWithDefault(this, 2, 0) as number;
+    }
+    set limit(value: number) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    get _last_evaluated_key() {
+      const cases: {
+        [index: number]: "none" | "last_evaluated_key";
+      } = {
+        0: "none",
+        1: "last_evaluated_key",
+      };
+      return cases[pb_1.Message.computeOneofCase(this, [1])];
+    }
+    static fromObject(data: {
+      last_evaluated_key?: string;
+      limit?: number;
+    }): ListVideosRequest {
       const message = new ListVideosRequest({});
+      if (data.last_evaluated_key != null) {
+        message.last_evaluated_key = data.last_evaluated_key;
+      }
+      if (data.limit != null) {
+        message.limit = data.limit;
+      }
       return message;
     }
     toObject() {
-      const data: {} = {};
+      const data: {
+        last_evaluated_key?: string;
+        limit?: number;
+      } = {};
+      if (this.last_evaluated_key != null) {
+        data.last_evaluated_key = this.last_evaluated_key;
+      }
+      if (this.limit != null) {
+        data.limit = this.limit;
+      }
       return data;
     }
     serialize(): Uint8Array;
     serialize(w: pb_1.BinaryWriter): void;
     serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
       const writer = w || new pb_1.BinaryWriter();
+      if (this.has_last_evaluated_key)
+        writer.writeString(1, this.last_evaluated_key);
+      if (this.limit != 0) writer.writeInt32(2, this.limit);
       if (!w) return writer.getResultBuffer();
     }
     static deserialize(
@@ -414,6 +476,12 @@ export namespace video {
       while (reader.nextField()) {
         if (reader.isEndGroup()) break;
         switch (reader.getFieldNumber()) {
+          case 1:
+            message.last_evaluated_key = reader.readString();
+            break;
+          case 2:
+            message.limit = reader.readInt32();
+            break;
           default:
             reader.skipField();
         }
@@ -552,13 +620,15 @@ export namespace video {
     }
   }
   export class ListVideosResponse extends pb_1.Message {
-    #one_of_decls: number[][] = [];
+    #one_of_decls: number[][] = [[2]];
     constructor(
       data?:
         | any[]
-        | {
+        | ({
             videos?: VideoInfo[];
-          },
+          } & {
+            last_evaluated_key?: string;
+          }),
     ) {
       super();
       pb_1.Message.initialize(
@@ -573,6 +643,12 @@ export namespace video {
         if ("videos" in data && data.videos != undefined) {
           this.videos = data.videos;
         }
+        if (
+          "last_evaluated_key" in data &&
+          data.last_evaluated_key != undefined
+        ) {
+          this.last_evaluated_key = data.last_evaluated_key;
+        }
       }
     }
     get videos() {
@@ -585,21 +661,47 @@ export namespace video {
     set videos(value: VideoInfo[]) {
       pb_1.Message.setRepeatedWrapperField(this, 1, value);
     }
+    get last_evaluated_key() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set last_evaluated_key(value: string) {
+      pb_1.Message.setOneofField(this, 2, this.#one_of_decls[0], value);
+    }
+    get has_last_evaluated_key() {
+      return pb_1.Message.getField(this, 2) != null;
+    }
+    get _last_evaluated_key() {
+      const cases: {
+        [index: number]: "none" | "last_evaluated_key";
+      } = {
+        0: "none",
+        2: "last_evaluated_key",
+      };
+      return cases[pb_1.Message.computeOneofCase(this, [2])];
+    }
     static fromObject(data: {
       videos?: ReturnType<typeof VideoInfo.prototype.toObject>[];
+      last_evaluated_key?: string;
     }): ListVideosResponse {
       const message = new ListVideosResponse({});
       if (data.videos != null) {
         message.videos = data.videos.map((item) => VideoInfo.fromObject(item));
+      }
+      if (data.last_evaluated_key != null) {
+        message.last_evaluated_key = data.last_evaluated_key;
       }
       return message;
     }
     toObject() {
       const data: {
         videos?: ReturnType<typeof VideoInfo.prototype.toObject>[];
+        last_evaluated_key?: string;
       } = {};
       if (this.videos != null) {
         data.videos = this.videos.map((item: VideoInfo) => item.toObject());
+      }
+      if (this.last_evaluated_key != null) {
+        data.last_evaluated_key = this.last_evaluated_key;
       }
       return data;
     }
@@ -611,6 +713,8 @@ export namespace video {
         writer.writeRepeatedMessage(1, this.videos, (item: VideoInfo) =>
           item.serialize(writer),
         );
+      if (this.has_last_evaluated_key)
+        writer.writeString(2, this.last_evaluated_key);
       if (!w) return writer.getResultBuffer();
     }
     static deserialize(
@@ -633,6 +737,9 @@ export namespace video {
                 VideoInfo,
               ),
             );
+            break;
+          case 2:
+            message.last_evaluated_key = reader.readString();
             break;
           default:
             reader.skipField();
