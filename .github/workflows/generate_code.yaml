@@ -30,19 +30,61 @@ jobs:
         with:
           go-version: '1.23'
 
-      - name: Install dependencies
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-mod-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-mod-${{ runner.os }}-
+
+      - name: Cache Protoc
+        id: cache-protoc
+        uses: actions/cache@v4
+        with:
+          path: $HOME/.local
+          key: protoc-${{ runner.os }}-30.1
+
+      - name: Install Protoc
+        if: steps.cache-protoc.outputs.cache-hit != 'true'
         env:
           PROTOC_VERSION: 30.1
-          PROTOC_GEN_GO_VERSION: 1.36.5
-          PROTOC_GEN_GO_GRPC_VERSION: 1.5.1
         run: |
           PB_REL="https://github.com/protocolbuffers/protobuf/releases"
           curl -LO $PB_REL/download/v$PROTOC_VERSION/protoc-$PROTOC_VERSION-linux-x86_64.zip
           unzip protoc-$PROTOC_VERSION-linux-x86_64.zip -d $HOME/.local
-          export PATH="$PATH:$HOME/.local/bin"
           rm -rf protoc-$PROTOC_VERSION-linux-x86_64.zip
+          echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+          source ~/.bashrc
+
+      - name: Cache Protoc Plugins
+        id: cache-protoc-plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin
+          key: protoc-plugins-${{ runner.os }}-1.36.5-1.5.1
+
+      - name: Install Protoc Plugins
+        if: steps.cache-protoc-plugins.outputs.cache-hit != 'true'
+        env:
+          PROTOC_GEN_GO_VERSION: 1.36.5
+          PROTOC_GEN_GO_GRPC_VERSION: 1.5.1
+        run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v$PROTOC_GEN_GO_VERSION
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v$PROTOC_GEN_GO_GRPC_VERSION
+
+      - name: Cache Node Modules
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: yarn-${{ runner.os }}-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: |
           cd frontend && yarn install --frozen-lockfile
           cd ..
 

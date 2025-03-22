@@ -12,39 +12,57 @@ on:
       - 'api/**'
 
 jobs:
-    test:
-        permissions:
-          contents: write
-          pull-requests: write
+  test:
+    permissions:
+      contents: write
+      pull-requests: write
 
-        runs-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
-        steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v4
-              with:
-                ref: ${{ github.head_ref }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
-            - name: Setup Go
-              uses: actions/setup-go@v5
-              with:
-                go-version: '1.23'
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
 
-            - name: Install dependencies
-              env:
-                GOIMPORTS_VERSION: 0.31.0
-              run: go install golang.org/x/tools/cmd/goimports@v$GOIMPORTS_VERSION
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: go-mod-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-mod-${{ runner.os }}-
 
-            - name: Auto Format Go
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                goimports -w api
-                git config --global user.name "github-actions[bot]"
-                git config --global user.email "github-actions[bot]@users.noreply.github.com"
-                if ! git diff --quiet
-                then
-                  git add -A
-                  git commit -m "auto format go"
-                  git push
-                fi
+      - name: Cache goimports
+        id: cache-goimports
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin/goimports
+          key: goimports-${{ runner.os }}-${{ env.GOIMPORTS_VERSION }}
+
+      - name: Install goimports
+        if: steps.cache-goimports.outputs.cache-hit != 'true'
+        env:
+          GOIMPORTS_VERSION: 0.31.0
+        run: go install golang.org/x/tools/cmd/goimports@v$GOIMPORTS_VERSION
+
+      - name: Auto Format Go
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          goimports -w api
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet
+          then
+            git add -A
+            git commit -m "auto format go"
+            git push
+          fi
