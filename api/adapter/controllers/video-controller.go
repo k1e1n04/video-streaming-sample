@@ -6,9 +6,10 @@ import (
 	"io"
 	"log"
 
+	parameter2 "github.com/k1e1n04/video-streaming-sample/api/video/application/parameter"
+	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
+
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/grpc/video"
-	"github.com/k1e1n04/video-streaming-sample/api/application/parameter"
-	"github.com/k1e1n04/video-streaming-sample/api/application/services"
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
 	"github.com/k1e1n04/video-streaming-sample/api/utils"
 	"google.golang.org/grpc"
@@ -53,7 +54,7 @@ func (v *VideoController) UploadVideo(server grpc.ClientStreamingServer[video.Up
 				)
 			}
 
-			id, err := v.videoService.Register(context.Background(), parameter.RegisterVideoParameter{
+			id, err := v.videoService.Register(context.Background(), parameter2.RegisterVideoParameter{
 				Title: title,
 				Video: bytes.NewReader(videoBuffer.Bytes()),
 			})
@@ -100,7 +101,7 @@ func (v *VideoController) UploadVideo(server grpc.ClientStreamingServer[video.Up
 
 // GetVideoURL is a method to get video URL
 func (v *VideoController) GetVideoURL(ctx context.Context, req *video.GetVideoRequest) (*video.GetVideoResponse, error) {
-	url, err := v.videoService.GetPresignedURLByVideoID(ctx, parameter.GetPresignedURLParameter{
+	url, err := v.videoService.GetPresignedURLByVideoID(ctx, parameter2.GetPresignedURLParameter{
 		VideoID: req.VideoId,
 	})
 	if err != nil {
@@ -113,7 +114,7 @@ func (v *VideoController) GetVideoURL(ctx context.Context, req *video.GetVideoRe
 
 // ListVideos is a method to list videos
 func (v *VideoController) ListVideos(ctx context.Context, req *video.ListVideosRequest) (*video.ListVideosResponse, error) {
-	videoPage, err := v.videoService.GetVideoPage(ctx, parameter.GetVideoPageParameter{
+	videoPage, err := v.videoService.GetVideoPage(ctx, parameter2.GetVideoPageParameter{
 		Limit:            req.Limit,
 		LastEvaluatedKey: req.LastEvaluatedKey,
 	})

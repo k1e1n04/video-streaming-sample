@@ -6,19 +6,32 @@
 import * as pb_1 from "google-protobuf";
 import * as grpc_1 from "@grpc/grpc-js";
 export namespace video {
+  export enum VideoStatus {
+    PENDING = 0,
+    PROCESSING = 1,
+    READY = 2,
+    FAILED = 3,
+  }
   export class UploadVideoRequest extends pb_1.Message {
-    #one_of_decls: number[][] = [[1, 2]];
+    #one_of_decls: number[][] = [[1, 2, 3]];
     constructor(
       data?:
         | any[]
         | ({} & (
             | {
-                title?: string;
+                metadata?: VideoMetadata;
                 chunk?: never;
+                thumbnail?: never;
               }
             | {
-                title?: never;
+                metadata?: never;
                 chunk?: Uint8Array;
+                thumbnail?: never;
+              }
+            | {
+                metadata?: never;
+                chunk?: never;
+                thumbnail?: Uint8Array;
               }
           )),
     ) {
@@ -32,21 +45,28 @@ export namespace video {
         this.#one_of_decls,
       );
       if (!Array.isArray(data) && typeof data == "object") {
-        if ("title" in data && data.title != undefined) {
-          this.title = data.title;
+        if ("metadata" in data && data.metadata != undefined) {
+          this.metadata = data.metadata;
         }
         if ("chunk" in data && data.chunk != undefined) {
           this.chunk = data.chunk;
         }
+        if ("thumbnail" in data && data.thumbnail != undefined) {
+          this.thumbnail = data.thumbnail;
+        }
       }
     }
-    get title() {
-      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    get metadata() {
+      return pb_1.Message.getWrapperField(
+        this,
+        VideoMetadata,
+        1,
+      ) as VideoMetadata;
     }
-    set title(value: string) {
-      pb_1.Message.setOneofField(this, 1, this.#one_of_decls[0], value);
+    set metadata(value: VideoMetadata) {
+      pb_1.Message.setOneofWrapperField(this, 1, this.#one_of_decls[0], value);
     }
-    get has_title() {
+    get has_metadata() {
       return pb_1.Message.getField(this, 1) != null;
     }
     get chunk() {
@@ -62,39 +82,61 @@ export namespace video {
     get has_chunk() {
       return pb_1.Message.getField(this, 2) != null;
     }
+    get thumbnail() {
+      return pb_1.Message.getFieldWithDefault(
+        this,
+        3,
+        new Uint8Array(0),
+      ) as Uint8Array;
+    }
+    set thumbnail(value: Uint8Array) {
+      pb_1.Message.setOneofField(this, 3, this.#one_of_decls[0], value);
+    }
+    get has_thumbnail() {
+      return pb_1.Message.getField(this, 3) != null;
+    }
     get data() {
       const cases: {
-        [index: number]: "none" | "title" | "chunk";
+        [index: number]: "none" | "metadata" | "chunk" | "thumbnail";
       } = {
         0: "none",
-        1: "title",
+        1: "metadata",
         2: "chunk",
+        3: "thumbnail",
       };
-      return cases[pb_1.Message.computeOneofCase(this, [1, 2])];
+      return cases[pb_1.Message.computeOneofCase(this, [1, 2, 3])];
     }
     static fromObject(data: {
-      title?: string;
+      metadata?: ReturnType<typeof VideoMetadata.prototype.toObject>;
       chunk?: Uint8Array;
+      thumbnail?: Uint8Array;
     }): UploadVideoRequest {
       const message = new UploadVideoRequest({});
-      if (data.title != null) {
-        message.title = data.title;
+      if (data.metadata != null) {
+        message.metadata = VideoMetadata.fromObject(data.metadata);
       }
       if (data.chunk != null) {
         message.chunk = data.chunk;
+      }
+      if (data.thumbnail != null) {
+        message.thumbnail = data.thumbnail;
       }
       return message;
     }
     toObject() {
       const data: {
-        title?: string;
+        metadata?: ReturnType<typeof VideoMetadata.prototype.toObject>;
         chunk?: Uint8Array;
+        thumbnail?: Uint8Array;
       } = {};
-      if (this.title != null) {
-        data.title = this.title;
+      if (this.metadata != null) {
+        data.metadata = this.metadata.toObject();
       }
       if (this.chunk != null) {
         data.chunk = this.chunk;
+      }
+      if (this.thumbnail != null) {
+        data.thumbnail = this.thumbnail;
       }
       return data;
     }
@@ -102,8 +144,12 @@ export namespace video {
     serialize(w: pb_1.BinaryWriter): void;
     serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
       const writer = w || new pb_1.BinaryWriter();
-      if (this.has_title) writer.writeString(1, this.title);
+      if (this.has_metadata)
+        writer.writeMessage(1, this.metadata, () =>
+          this.metadata.serialize(writer),
+        );
       if (this.has_chunk) writer.writeBytes(2, this.chunk);
+      if (this.has_thumbnail) writer.writeBytes(3, this.thumbnail);
       if (!w) return writer.getResultBuffer();
     }
     static deserialize(
@@ -118,10 +164,16 @@ export namespace video {
         if (reader.isEndGroup()) break;
         switch (reader.getFieldNumber()) {
           case 1:
-            message.title = reader.readString();
+            reader.readMessage(
+              message.metadata,
+              () => (message.metadata = VideoMetadata.deserialize(reader)),
+            );
             break;
           case 2:
             message.chunk = reader.readBytes();
+            break;
+          case 3:
+            message.thumbnail = reader.readBytes();
             break;
           default:
             reader.skipField();
@@ -134,6 +186,178 @@ export namespace video {
     }
     static deserializeBinary(bytes: Uint8Array): UploadVideoRequest {
       return UploadVideoRequest.deserialize(bytes);
+    }
+  }
+  export class VideoMetadata extends pb_1.Message {
+    #one_of_decls: number[][] = [];
+    constructor(
+      data?:
+        | any[]
+        | {
+            title?: string;
+            description?: string;
+            extension?: string;
+            duration?: number;
+            thumbnailExtension?: string;
+          },
+    ) {
+      super();
+      pb_1.Message.initialize(
+        this,
+        Array.isArray(data) ? data : [],
+        0,
+        -1,
+        [],
+        this.#one_of_decls,
+      );
+      if (!Array.isArray(data) && typeof data == "object") {
+        if ("title" in data && data.title != undefined) {
+          this.title = data.title;
+        }
+        if ("description" in data && data.description != undefined) {
+          this.description = data.description;
+        }
+        if ("extension" in data && data.extension != undefined) {
+          this.extension = data.extension;
+        }
+        if ("duration" in data && data.duration != undefined) {
+          this.duration = data.duration;
+        }
+        if (
+          "thumbnailExtension" in data &&
+          data.thumbnailExtension != undefined
+        ) {
+          this.thumbnailExtension = data.thumbnailExtension;
+        }
+      }
+    }
+    get title() {
+      return pb_1.Message.getFieldWithDefault(this, 1, "") as string;
+    }
+    set title(value: string) {
+      pb_1.Message.setField(this, 1, value);
+    }
+    get description() {
+      return pb_1.Message.getFieldWithDefault(this, 2, "") as string;
+    }
+    set description(value: string) {
+      pb_1.Message.setField(this, 2, value);
+    }
+    get extension() {
+      return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
+    }
+    set extension(value: string) {
+      pb_1.Message.setField(this, 3, value);
+    }
+    get duration() {
+      return pb_1.Message.getFieldWithDefault(this, 4, 0) as number;
+    }
+    set duration(value: number) {
+      pb_1.Message.setField(this, 4, value);
+    }
+    get thumbnailExtension() {
+      return pb_1.Message.getFieldWithDefault(this, 5, "") as string;
+    }
+    set thumbnailExtension(value: string) {
+      pb_1.Message.setField(this, 5, value);
+    }
+    static fromObject(data: {
+      title?: string;
+      description?: string;
+      extension?: string;
+      duration?: number;
+      thumbnailExtension?: string;
+    }): VideoMetadata {
+      const message = new VideoMetadata({});
+      if (data.title != null) {
+        message.title = data.title;
+      }
+      if (data.description != null) {
+        message.description = data.description;
+      }
+      if (data.extension != null) {
+        message.extension = data.extension;
+      }
+      if (data.duration != null) {
+        message.duration = data.duration;
+      }
+      if (data.thumbnailExtension != null) {
+        message.thumbnailExtension = data.thumbnailExtension;
+      }
+      return message;
+    }
+    toObject() {
+      const data: {
+        title?: string;
+        description?: string;
+        extension?: string;
+        duration?: number;
+        thumbnailExtension?: string;
+      } = {};
+      if (this.title != null) {
+        data.title = this.title;
+      }
+      if (this.description != null) {
+        data.description = this.description;
+      }
+      if (this.extension != null) {
+        data.extension = this.extension;
+      }
+      if (this.duration != null) {
+        data.duration = this.duration;
+      }
+      if (this.thumbnailExtension != null) {
+        data.thumbnailExtension = this.thumbnailExtension;
+      }
+      return data;
+    }
+    serialize(): Uint8Array;
+    serialize(w: pb_1.BinaryWriter): void;
+    serialize(w?: pb_1.BinaryWriter): Uint8Array | void {
+      const writer = w || new pb_1.BinaryWriter();
+      if (this.title.length) writer.writeString(1, this.title);
+      if (this.description.length) writer.writeString(2, this.description);
+      if (this.extension.length) writer.writeString(3, this.extension);
+      if (this.duration != 0) writer.writeInt64(4, this.duration);
+      if (this.thumbnailExtension.length)
+        writer.writeString(5, this.thumbnailExtension);
+      if (!w) return writer.getResultBuffer();
+    }
+    static deserialize(bytes: Uint8Array | pb_1.BinaryReader): VideoMetadata {
+      const reader =
+          bytes instanceof pb_1.BinaryReader
+            ? bytes
+            : new pb_1.BinaryReader(bytes),
+        message = new VideoMetadata();
+      while (reader.nextField()) {
+        if (reader.isEndGroup()) break;
+        switch (reader.getFieldNumber()) {
+          case 1:
+            message.title = reader.readString();
+            break;
+          case 2:
+            message.description = reader.readString();
+            break;
+          case 3:
+            message.extension = reader.readString();
+            break;
+          case 4:
+            message.duration = reader.readInt64();
+            break;
+          case 5:
+            message.thumbnailExtension = reader.readString();
+            break;
+          default:
+            reader.skipField();
+        }
+      }
+      return message;
+    }
+    serializeBinary(): Uint8Array {
+      return this.serialize();
+    }
+    static deserializeBinary(bytes: Uint8Array): VideoMetadata {
+      return VideoMetadata.deserialize(bytes);
     }
   }
   export class UploadVideoResponse extends pb_1.Message {
@@ -503,6 +727,12 @@ export namespace video {
         | {
             video_id?: string;
             title?: string;
+            description?: string;
+            thumbnail_url?: string;
+            views?: number;
+            likes?: number;
+            duration?: number;
+            status?: VideoStatus;
             created_at?: string;
           },
     ) {
@@ -522,6 +752,24 @@ export namespace video {
         if ("title" in data && data.title != undefined) {
           this.title = data.title;
         }
+        if ("description" in data && data.description != undefined) {
+          this.description = data.description;
+        }
+        if ("thumbnail_url" in data && data.thumbnail_url != undefined) {
+          this.thumbnail_url = data.thumbnail_url;
+        }
+        if ("views" in data && data.views != undefined) {
+          this.views = data.views;
+        }
+        if ("likes" in data && data.likes != undefined) {
+          this.likes = data.likes;
+        }
+        if ("duration" in data && data.duration != undefined) {
+          this.duration = data.duration;
+        }
+        if ("status" in data && data.status != undefined) {
+          this.status = data.status;
+        }
         if ("created_at" in data && data.created_at != undefined) {
           this.created_at = data.created_at;
         }
@@ -539,15 +787,61 @@ export namespace video {
     set title(value: string) {
       pb_1.Message.setField(this, 2, value);
     }
-    get created_at() {
+    get description() {
       return pb_1.Message.getFieldWithDefault(this, 3, "") as string;
     }
-    set created_at(value: string) {
+    set description(value: string) {
       pb_1.Message.setField(this, 3, value);
+    }
+    get thumbnail_url() {
+      return pb_1.Message.getFieldWithDefault(this, 4, "") as string;
+    }
+    set thumbnail_url(value: string) {
+      pb_1.Message.setField(this, 4, value);
+    }
+    get views() {
+      return pb_1.Message.getFieldWithDefault(this, 5, 0) as number;
+    }
+    set views(value: number) {
+      pb_1.Message.setField(this, 5, value);
+    }
+    get likes() {
+      return pb_1.Message.getFieldWithDefault(this, 6, 0) as number;
+    }
+    set likes(value: number) {
+      pb_1.Message.setField(this, 6, value);
+    }
+    get duration() {
+      return pb_1.Message.getFieldWithDefault(this, 7, 0) as number;
+    }
+    set duration(value: number) {
+      pb_1.Message.setField(this, 7, value);
+    }
+    get status() {
+      return pb_1.Message.getFieldWithDefault(
+        this,
+        8,
+        VideoStatus.PENDING,
+      ) as VideoStatus;
+    }
+    set status(value: VideoStatus) {
+      pb_1.Message.setField(this, 8, value);
+    }
+    get created_at() {
+      return pb_1.Message.getFieldWithDefault(this, 9, "") as string;
+    }
+    set created_at(value: string) {
+      pb_1.Message.setField(this, 9, value);
     }
     static fromObject(data: {
       video_id?: string;
       title?: string;
+      description?: string;
+      thumbnail_url?: string;
+      views?: number;
+      likes?: number;
+      duration?: number;
+      status?: VideoStatus;
       created_at?: string;
     }): VideoInfo {
       const message = new VideoInfo({});
@@ -556,6 +850,24 @@ export namespace video {
       }
       if (data.title != null) {
         message.title = data.title;
+      }
+      if (data.description != null) {
+        message.description = data.description;
+      }
+      if (data.thumbnail_url != null) {
+        message.thumbnail_url = data.thumbnail_url;
+      }
+      if (data.views != null) {
+        message.views = data.views;
+      }
+      if (data.likes != null) {
+        message.likes = data.likes;
+      }
+      if (data.duration != null) {
+        message.duration = data.duration;
+      }
+      if (data.status != null) {
+        message.status = data.status;
       }
       if (data.created_at != null) {
         message.created_at = data.created_at;
@@ -566,6 +878,12 @@ export namespace video {
       const data: {
         video_id?: string;
         title?: string;
+        description?: string;
+        thumbnail_url?: string;
+        views?: number;
+        likes?: number;
+        duration?: number;
+        status?: VideoStatus;
         created_at?: string;
       } = {};
       if (this.video_id != null) {
@@ -573,6 +891,24 @@ export namespace video {
       }
       if (this.title != null) {
         data.title = this.title;
+      }
+      if (this.description != null) {
+        data.description = this.description;
+      }
+      if (this.thumbnail_url != null) {
+        data.thumbnail_url = this.thumbnail_url;
+      }
+      if (this.views != null) {
+        data.views = this.views;
+      }
+      if (this.likes != null) {
+        data.likes = this.likes;
+      }
+      if (this.duration != null) {
+        data.duration = this.duration;
+      }
+      if (this.status != null) {
+        data.status = this.status;
       }
       if (this.created_at != null) {
         data.created_at = this.created_at;
@@ -585,7 +921,13 @@ export namespace video {
       const writer = w || new pb_1.BinaryWriter();
       if (this.video_id.length) writer.writeString(1, this.video_id);
       if (this.title.length) writer.writeString(2, this.title);
-      if (this.created_at.length) writer.writeString(3, this.created_at);
+      if (this.description.length) writer.writeString(3, this.description);
+      if (this.thumbnail_url.length) writer.writeString(4, this.thumbnail_url);
+      if (this.views != 0) writer.writeInt64(5, this.views);
+      if (this.likes != 0) writer.writeInt64(6, this.likes);
+      if (this.duration != 0) writer.writeInt64(7, this.duration);
+      if (this.status != VideoStatus.PENDING) writer.writeEnum(8, this.status);
+      if (this.created_at.length) writer.writeString(9, this.created_at);
       if (!w) return writer.getResultBuffer();
     }
     static deserialize(bytes: Uint8Array | pb_1.BinaryReader): VideoInfo {
@@ -604,6 +946,24 @@ export namespace video {
             message.title = reader.readString();
             break;
           case 3:
+            message.description = reader.readString();
+            break;
+          case 4:
+            message.thumbnail_url = reader.readString();
+            break;
+          case 5:
+            message.views = reader.readInt64();
+            break;
+          case 6:
+            message.likes = reader.readInt64();
+            break;
+          case 7:
+            message.duration = reader.readInt64();
+            break;
+          case 8:
+            message.status = reader.readEnum();
+            break;
+          case 9:
             message.created_at = reader.readString();
             break;
           default:
