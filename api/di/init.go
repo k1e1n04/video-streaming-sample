@@ -4,6 +4,11 @@ import (
 	"context"
 	"os"
 
+	repositories "github.com/k1e1n04/video-streaming-sample/api/adapter/infra/repositories/video"
+
+	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
+	repositories2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -11,10 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/controllers"
-	"github.com/k1e1n04/video-streaming-sample/api/application/services"
-	"github.com/k1e1n04/video-streaming-sample/api/domain/repositories"
 	"github.com/k1e1n04/video-streaming-sample/api/env"
-	repositories2 "github.com/k1e1n04/video-streaming-sample/api/infra/repositories"
 	"go.uber.org/dig"
 )
 
@@ -112,8 +114,8 @@ func initClient(container *dig.Container, setting *env.ApplicationSetting) {
 
 // initRepositories is a function to initialize repositories
 func initRepositories(container *dig.Container) {
-	err := container.Provide(func(dynamodb *dynamodb.Client) repositories.VideoMetadataRepository {
-		return repositories2.NewVideoMetadataRepositoryImpl(dynamodb)
+	err := container.Provide(func(dynamodb *dynamodb.Client) repositories2.VideoMetadataRepository {
+		return repositories.NewVideoMetadataRepositoryImpl(dynamodb)
 	})
 	if err != nil {
 		panic(err)
@@ -123,8 +125,19 @@ func initRepositories(container *dig.Container) {
 		s3Client *s3.Client,
 		s3Uploader *manager.Uploader,
 		setting *env.ApplicationSetting,
-	) repositories.VideoStorageRepository {
-		return repositories2.NewVideoStorageRepositoryImpl(s3Client, s3Uploader, setting)
+	) repositories2.VideoStorageRepository {
+		return repositories.NewVideoStorageRepositoryImpl(s3Client, s3Uploader, setting)
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = container.Provide(func(
+		s3Client *s3.Client,
+		s3Uploader *manager.Uploader,
+		setting *env.ApplicationSetting,
+	) repositories2.ThumbnailStorageRepository {
+		return repositories.NewThumbnailStorageRepositoryImpl(s3Client, s3Uploader, setting)
 	})
 	if err != nil {
 		panic(err)
@@ -134,10 +147,11 @@ func initRepositories(container *dig.Container) {
 // initServices is a function to initialize services
 func initServices(container *dig.Container) {
 	err := container.Provide(func(
-		videoMetadataRepository repositories.VideoMetadataRepository,
-		videoStorageRepository repositories.VideoStorageRepository,
+		videoMetadataRepository repositories2.VideoMetadataRepository,
+		videoStorageRepository repositories2.VideoStorageRepository,
+		thumbnailStorageRepository repositories2.ThumbnailStorageRepository,
 	) services.VideoService {
-		return services.NewVideoService(videoMetadataRepository, videoStorageRepository)
+		return services.NewVideoService(videoMetadataRepository, videoStorageRepository, thumbnailStorageRepository)
 	})
 	if err != nil {
 		panic(err)

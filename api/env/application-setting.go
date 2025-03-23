@@ -9,13 +9,10 @@ import (
 
 // ApplicationSetting is application setting
 type ApplicationSetting struct {
-	env             string
-	awsRegion       string
-	videoBucketName string
-	// minioAccessKey is minio access key for local
-	minioAccessKey string
-	// minioSecretKey is minio secret key for local
-	minioSecretKey string
+	env                 string
+	awsRegion           string
+	videoBucketName     string
+	thumbnailBucketName string
 }
 
 const LocalEnv = "local"
@@ -36,6 +33,10 @@ func NewApplicationSetting() *ApplicationSetting {
 	videoBucketName := os.Getenv("VIDEO_BUCKET_NAME")
 	if videoBucketName == "" {
 		videoBucketName = "local-video-bucket"
+	}
+	thumbnailBucketName := os.Getenv("THUMBNAIL_BUCKET_NAME")
+	if thumbnailBucketName == "" {
+		videoBucketName = "local-thumbnail-bucket"
 	}
 
 	return &ApplicationSetting{
@@ -58,4 +59,9 @@ func (a *ApplicationSetting) AWSRegion() string {
 // VideoBucketName is get video bucket name
 func (a *ApplicationSetting) VideoBucketName() string {
 	return a.videoBucketName
+}
+
+// ThumbnailBucketName is get thumbnail bucket name
+func (a *ApplicationSetting) ThumbnailBucketName() string {
+	return a.thumbnailBucketName
 }

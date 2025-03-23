@@ -19,5 +19,5 @@ func NewBadRequestError(
 
 // Error returns an error message
 func (e *BadRequestError) Error() string {
-	return e.DebugMessage
+	return e.FrontMessage
 }

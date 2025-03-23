@@ -7,3 +7,4 @@ sleep 5
 
 echo "Creating S3 bucket..."
 aws s3api create-bucket --bucket local-video-bucket --endpoint-url http://minio:9000
+aws s3api create-bucket --bucket local-thumbnail-bucket --endpoint-url http://minio:9000

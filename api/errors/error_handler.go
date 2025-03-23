@@ -5,28 +5,7 @@ import (
 	"log"
 
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
-
-// ErrorHandler is a function to handle errors
-func ErrorHandler[T any](f func() (*T, error)) (*T, error) {
-	res, err := f()
-	if err != nil {
-		msg, code := HandleError(err)
-		return nil, status.Error(code, msg)
-	}
-	return res, nil
-}
-
-// ErrorHandlerWithoutResponse is a function to handle errors without response
-func ErrorHandlerWithoutResponse(f func() error) error {
-	err := f()
-	if err != nil {
-		msg, code := HandleError(err)
-		return status.Error(code, msg)
-	}
-	return nil
-}
 
 // HandleError is a function to handle error
 func HandleError(err error) (string, codes.Code) {
@@ -44,6 +23,10 @@ func HandleError(err error) (string, codes.Code) {
 			code = codes.NotFound
 			msg = e.FrontMessage
 			log.Printf("NotFoundError: %v", e)
+		case *UnauthorizedError:
+			code = codes.PermissionDenied
+			msg = e.FrontMessage
+			log.Printf("UnauthorizedError: %v", e)
 		case *InvalidStatementError:
 			log.Printf("InvalidStatementError: %v", e)
 			if e.Cause != nil {

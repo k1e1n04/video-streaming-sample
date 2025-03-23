@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 
+	entities2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
+	"github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	entities2 "github.com/k1e1n04/video-streaming-sample/api/domain/entities"
-	"github.com/k1e1n04/video-streaming-sample/api/domain/repositories"
 	"github.com/k1e1n04/video-streaming-sample/api/env"
 )
 
@@ -50,10 +51,10 @@ func (v *VideoStorageRepositoryImpl) Store(ctx context.Context, videoID entities
 }
 
 // GetPresignedURLByVideoID is a method to get presigned URL by video ID
-func (v *VideoStorageRepositoryImpl) GetPresignedURLByVideoID(ctx context.Context, videoID entities2.VideoID) (string, error) {
+func (v *VideoStorageRepositoryImpl) GetPresignedURLByVideoID(ctx context.Context, videoID entities2.VideoID, extension string) (string, error) {
 	presignedURL, err := s3.NewPresignClient(v.s3Client).PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(v.setting.VideoBucketName()),
-		Key:    aws.String(videoID.Value() + ".mp4"),
+		Key:    aws.String(videoID.Value() + "." + extension),
 	})
 	if err != nil {
 		return "", err

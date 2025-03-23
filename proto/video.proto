@@ -12,9 +12,19 @@ service VideoService {
 
 message UploadVideoRequest {
   oneof data {
-    string title = 1; // in the first request, the title is sent
-    bytes chunk = 2;  // in the following requests, the video chunk is sent
+    VideoMetadata metadata = 1; // first request
+    bytes chunk = 2;            // chunked data
+    bytes thumbnail = 3;        // thumbnail data
   }
+}
+
+message VideoMetadata {
+  string title = 1;
+  string description = 2;
+  string extension = 3;
+  int64 duration = 4;
+  string thumbnailExtension = 5;
+  VideoStatus status = 6;
 }
 
 message UploadVideoResponse {
@@ -34,10 +44,22 @@ message ListVideosRequest {
   int32 limit = 2;
 }
 
+enum VideoStatus {
+  PUBLIC = 0;
+  PRIVATE = 1;
+  FAILED = 2;
+}
+
 message VideoInfo {
   string video_id = 1;
   string title = 2;
-  string created_at = 3;
+  string description = 3;
+  string thumbnail_url = 4;
+  int64 views = 5;
+  int64 likes = 6;
+  int64 duration = 7;
+  VideoStatus status = 8;
+  string created_at = 9;
 }
 
 message ListVideosResponse {

@@ -2,14 +2,16 @@ package repositories
 
 import (
 	"context"
+	"strconv"
+
+	"github.com/k1e1n04/video-streaming-sample/api/adapter/infra/records"
+	"github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
+	"github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	entities2 "github.com/k1e1n04/video-streaming-sample/api/domain/entities"
-	"github.com/k1e1n04/video-streaming-sample/api/domain/repositories"
-	"github.com/k1e1n04/video-streaming-sample/api/infra/records"
 	"github.com/k1e1n04/video-streaming-sample/api/utils"
 )
 
@@ -26,7 +28,7 @@ func NewVideoMetadataRepositoryImpl(dynamodbClient *dynamodb.Client) repositorie
 }
 
 // toRecord is a method to convert VideoMetadataEntity to record
-func (r *VideoMetadataRepositoryImpl) toRecord(video entities2.VideoMetadataEntity) records.VideoMetadata {
+func (r *VideoMetadataRepositoryImpl) toRecord(video entities.VideoMetadataEntity) records.VideoMetadata {
 	return records.VideoMetadata{
 		ID:        video.ID().Value(),
 		Title:     video.Title().Value(),
@@ -35,10 +37,19 @@ func (r *VideoMetadataRepositoryImpl) toRecord(video entities2.VideoMetadataEnti
 }
 
 // toEntity is a method to convert record to VideoMetadataEntity
-func (r *VideoMetadataRepositoryImpl) toEntity(video records.VideoMetadata) (*entities2.VideoMetadataEntity, error) {
-	entity, err := entities2.RestoreVideoMetadataEntity(
+func (r *VideoMetadataRepositoryImpl) toEntity(video records.VideoMetadata) (*entities.VideoMetadataEntity, error) {
+	entity, err := entities.RestoreVideoMetadataEntity(
 		video.ID,
+		video.UserID,
+		video.VideoExtension,
 		video.Title,
+		video.ThumbnailID,
+		video.ThumbnailExtension,
+		video.Description,
+		video.Status,
+		video.Likes,
+		video.Duration,
+		video.Views,
 		video.CreatedAt,
 	)
 	if err != nil {
@@ -48,15 +59,24 @@ func (r *VideoMetadataRepositoryImpl) toEntity(video records.VideoMetadata) (*en
 }
 
 // Register is a method to register video metadata
-func (r *VideoMetadataRepositoryImpl) Register(ctx context.Context, video entities2.VideoMetadataEntity) error {
+func (r *VideoMetadataRepositoryImpl) Register(ctx context.Context, video entities.VideoMetadataEntity) error {
 	record := r.toRecord(video)
 
 	_, err := r.dynamodbClient.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(records.VideoMetadataTableName),
 		Item: map[string]types.AttributeValue{
-			"id":         &types.AttributeValueMemberS{Value: record.ID},
-			"title":      &types.AttributeValueMemberS{Value: record.Title},
-			"created_at": &types.AttributeValueMemberS{Value: record.CreatedAt},
+			"id":                  &types.AttributeValueMemberS{Value: record.ID},
+			"title":               &types.AttributeValueMemberS{Value: record.Title},
+			"thumbnail_id":        &types.AttributeValueMemberS{Value: record.ThumbnailID},
+			"thumbnail_extension": &types.AttributeValueMemberS{Value: record.ThumbnailExtension},
+			"video_extension":     &types.AttributeValueMemberS{Value: record.VideoExtension},
+			"user_id":             &types.AttributeValueMemberS{Value: record.UserID},
+			"description":         &types.AttributeValueMemberS{Value: record.Description},
+			"status":              &types.AttributeValueMemberS{Value: record.Status},
+			"likes":               &types.AttributeValueMemberN{Value: strconv.FormatInt(record.Likes, 10)},
+			"views":               &types.AttributeValueMemberN{Value: strconv.FormatInt(record.Views, 10)},
+			"duration":            &types.AttributeValueMemberN{Value: strconv.FormatInt(record.Duration, 10)},
+			"created_at":          &types.AttributeValueMemberS{Value: record.CreatedAt},
 		},
 	})
 	if err != nil {
@@ -66,7 +86,7 @@ func (r *VideoMetadataRepositoryImpl) Register(ctx context.Context, video entiti
 }
 
 // FindByID is a method to find video metadata by id
-func (r *VideoMetadataRepositoryImpl) FindByID(ctx context.Context, videoID entities2.VideoID) (*entities2.VideoMetadataEntity, error) {
+func (r *VideoMetadataRepositoryImpl) FindByID(ctx context.Context, videoID entities.VideoID) (*entities.VideoMetadataEntity, error) {
 	var record records.VideoMetadata
 	result, err := r.dynamodbClient.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String(records.VideoMetadataTableName),
@@ -93,8 +113,8 @@ func (r *VideoMetadataRepositoryImpl) FindByID(ctx context.Context, videoID enti
 }
 
 // FindPage is a method to find all video metadata
-func (r *VideoMetadataRepositoryImpl) FindPage(ctx context.Context, limit int32, lastEvaluatedKey *string) (*utils.Pageable[entities2.VideoMetadataEntity], error) {
-	var videos []entities2.VideoMetadataEntity
+func (r *VideoMetadataRepositoryImpl) FindPage(ctx context.Context, limit int32, lastEvaluatedKey *string) (*utils.Pageable[entities.VideoMetadataEntity], error) {
+	var videos []entities.VideoMetadataEntity
 	var lastEvaluatedKeyMap map[string]types.AttributeValue
 
 	if lastEvaluatedKey != nil {
