@@ -2,9 +2,9 @@ package di
 
 import (
 	"context"
+	repositories "github.com/k1e1n04/video-streaming-sample/api/adapter/infra/repositories/video"
 	"os"
 
-	"github.com/k1e1n04/video-streaming-sample/api/infra/repositories/video"
 	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
 	repositories2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"
 
@@ -114,7 +114,7 @@ func initClient(container *dig.Container, setting *env.ApplicationSetting) {
 // initRepositories is a function to initialize repositories
 func initRepositories(container *dig.Container) {
 	err := container.Provide(func(dynamodb *dynamodb.Client) repositories2.VideoMetadataRepository {
-		return video.NewVideoMetadataRepositoryImpl(dynamodb)
+		return repositories.NewVideoMetadataRepositoryImpl(dynamodb)
 	})
 	if err != nil {
 		panic(err)
@@ -125,7 +125,18 @@ func initRepositories(container *dig.Container) {
 		s3Uploader *manager.Uploader,
 		setting *env.ApplicationSetting,
 	) repositories2.VideoStorageRepository {
-		return video.NewVideoStorageRepositoryImpl(s3Client, s3Uploader, setting)
+		return repositories.NewVideoStorageRepositoryImpl(s3Client, s3Uploader, setting)
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	err = container.Provide(func(
+		s3Client *s3.Client,
+		s3Uploader *manager.Uploader,
+		setting *env.ApplicationSetting,
+	) repositories2.ThumbnailStorageRepository {
+		return repositories.NewThumbnailStorageRepositoryImpl(s3Client, s3Uploader, setting)
 	})
 	if err != nil {
 		panic(err)
@@ -137,8 +148,9 @@ func initServices(container *dig.Container) {
 	err := container.Provide(func(
 		videoMetadataRepository repositories2.VideoMetadataRepository,
 		videoStorageRepository repositories2.VideoStorageRepository,
+		thumbnailStorageRepository repositories2.ThumbnailStorageRepository,
 	) services.VideoService {
-		return services.NewVideoService(videoMetadataRepository, videoStorageRepository)
+		return services.NewVideoService(videoMetadataRepository, videoStorageRepository, thumbnailStorageRepository)
 	})
 	if err != nil {
 		panic(err)
