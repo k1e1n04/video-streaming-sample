@@ -24,6 +24,7 @@ message VideoMetadata {
   string extension = 3;
   int64 duration = 4;
   string thumbnailExtension = 5;
+  VideoStatus status = 6;
 }
 
 message UploadVideoResponse {
