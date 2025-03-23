@@ -2,8 +2,9 @@ package di
 
 import (
 	"context"
-	repositories "github.com/k1e1n04/video-streaming-sample/api/adapter/infra/repositories/video"
 	"os"
+
+	repositories "github.com/k1e1n04/video-streaming-sample/api/adapter/infra/repositories/video"
 
 	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"
 	repositories2 "github.com/k1e1n04/video-streaming-sample/api/video/domain/repositories"

@@ -3,10 +3,11 @@ package controllers
 import (
 	"bytes"
 	"context"
-	context2 "github.com/k1e1n04/video-streaming-sample/api/adapter/context"
-	"github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
 	"io"
 	"log"
+
+	context2 "github.com/k1e1n04/video-streaming-sample/api/adapter/context"
+	"github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
 
 	parameter2 "github.com/k1e1n04/video-streaming-sample/api/video/application/parameter"
 	"github.com/k1e1n04/video-streaming-sample/api/video/application/services"

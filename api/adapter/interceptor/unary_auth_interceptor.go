@@ -3,9 +3,10 @@ package interceptor
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	context2 "github.com/k1e1n04/video-streaming-sample/api/adapter/context"
 	"github.com/k1e1n04/video-streaming-sample/api/errors"
-	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
