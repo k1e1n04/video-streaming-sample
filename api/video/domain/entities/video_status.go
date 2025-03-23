@@ -31,14 +31,14 @@ func (s VideoStatus) String() string {
 
 // NewVideoStatus is a constructor
 func NewVideoStatus(
-	s string,
+	s int,
 ) (VideoStatus, error) {
 	switch s {
-	case "PUBLIC":
+	case 0:
 		return VideoStatusPublic, nil
-	case "PRIVATE":
+	case 1:
 		return VideoStatusPrivate, nil
-	case "FAILED":
+	case 2:
 		return VideoStatusFailed, nil
 	default:
 		return VideoStatus(-1), errors.NewBadRequestError(
