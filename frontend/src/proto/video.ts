@@ -7,10 +7,9 @@ import * as pb_1 from "google-protobuf";
 import * as grpc_1 from "@grpc/grpc-js";
 export namespace video {
   export enum VideoStatus {
-    PENDING = 0,
-    PROCESSING = 1,
-    READY = 2,
-    FAILED = 3,
+    PUBLIC = 0,
+    PRIVATE = 1,
+    FAILED = 2,
   }
   export class UploadVideoRequest extends pb_1.Message {
     #one_of_decls: number[][] = [[1, 2, 3]];
@@ -269,7 +268,7 @@ export namespace video {
       return pb_1.Message.getFieldWithDefault(
         this,
         6,
-        VideoStatus.PENDING,
+        VideoStatus.PUBLIC,
       ) as VideoStatus;
     }
     set status(value: VideoStatus) {
@@ -343,7 +342,7 @@ export namespace video {
       if (this.duration != 0) writer.writeInt64(4, this.duration);
       if (this.thumbnailExtension.length)
         writer.writeString(5, this.thumbnailExtension);
-      if (this.status != VideoStatus.PENDING) writer.writeEnum(6, this.status);
+      if (this.status != VideoStatus.PUBLIC) writer.writeEnum(6, this.status);
       if (!w) return writer.getResultBuffer();
     }
     static deserialize(bytes: Uint8Array | pb_1.BinaryReader): VideoMetadata {
@@ -847,7 +846,7 @@ export namespace video {
       return pb_1.Message.getFieldWithDefault(
         this,
         8,
-        VideoStatus.PENDING,
+        VideoStatus.PUBLIC,
       ) as VideoStatus;
     }
     set status(value: VideoStatus) {
@@ -952,7 +951,7 @@ export namespace video {
       if (this.views != 0) writer.writeInt64(5, this.views);
       if (this.likes != 0) writer.writeInt64(6, this.likes);
       if (this.duration != 0) writer.writeInt64(7, this.duration);
-      if (this.status != VideoStatus.PENDING) writer.writeEnum(8, this.status);
+      if (this.status != VideoStatus.PUBLIC) writer.writeEnum(8, this.status);
       if (this.created_at.length) writer.writeString(9, this.created_at);
       if (!w) return writer.getResultBuffer();
     }
