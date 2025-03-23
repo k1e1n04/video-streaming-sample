@@ -18,8 +18,15 @@ func main() {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
+	authInterceptor := intercepter.NewAuthInterceptor(
+		intercepter.VerifyToken,
+	)
+
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(intercepter.UnaryErrorInterceptor),
+		grpc.ChainUnaryInterceptor(
+			intercepter.UnaryErrorInterceptor,
+			authInterceptor.Unary(),
+		),
 	)
 	container := di.Init()
 
