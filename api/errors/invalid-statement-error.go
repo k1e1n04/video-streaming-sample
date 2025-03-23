@@ -19,5 +19,5 @@ func NewInvalidStatementError(
 
 // Error returns an error message
 func (e *InvalidStatementError) Error() string {
-	return e.DebugMessage
+	return "internal server error"
 }

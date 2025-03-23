@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"github.com/k1e1n04/video-streaming-sample/api/shared/models"
 
 	"github.com/k1e1n04/video-streaming-sample/api/video/application/dto"
 	parameter2 "github.com/k1e1n04/video-streaming-sample/api/video/application/parameter"
@@ -15,31 +16,44 @@ import (
 )
 
 type VideoService struct {
-	videoMetadataRepository repositories2.VideoMetadataRepository
-	videoStorageRepository  repositories2.VideoStorageRepository
+	videoMetadataRepository    repositories2.VideoMetadataRepository
+	videoStorageRepository     repositories2.VideoStorageRepository
+	thumbnailStorageRepository repositories2.ThumbnailStorageRepository
 }
 
 // NewVideoService is a constructor
 func NewVideoService(
 	videoMetadataRepository repositories2.VideoMetadataRepository,
 	videoStorageRepository repositories2.VideoStorageRepository,
+	thumbnailStorageRepository repositories2.ThumbnailStorageRepository,
 ) VideoService {
 	return VideoService{
-		videoMetadataRepository: videoMetadataRepository,
-		videoStorageRepository:  videoStorageRepository,
+		videoMetadataRepository:    videoMetadataRepository,
+		videoStorageRepository:     videoStorageRepository,
+		thumbnailStorageRepository: thumbnailStorageRepository,
 	}
 }
 
 // Register is a method to register video
 func (v *VideoService) Register(ctx context.Context, p parameter2.RegisterVideoParameter) (*string, error) {
+	userID := models.RestoreUserID(p.UserID)
 	metadata, err := entities2.NewVideoMetadataEntity(
+		p.Extension,
 		p.Title,
+		p.Description,
+		p.ThumbnailExtension,
+		p.Duration,
+		p.Status,
+		userID,
 	)
 	if err != nil {
 		return nil, err
 	}
 	id := metadata.ID()
-	if err := v.videoStorageRepository.Store(ctx, *id, p.Video, "mp4"); err != nil {
+	if err := v.videoStorageRepository.Store(ctx, *id, p.Video, p.ThumbnailExtension); err != nil {
+		return nil, err
+	}
+	if err := v.thumbnailStorageRepository.Store(ctx, *id, p.Thumbnail, p.ThumbnailExtension); err != nil {
 		return nil, err
 	}
 	if err := v.videoMetadataRepository.Register(ctx, *metadata); err != nil {
@@ -63,7 +77,8 @@ func (v *VideoService) GetPresignedURLByVideoID(ctx context.Context, p parameter
 			nil,
 		)
 	}
-	url, err := v.videoStorageRepository.GetPresignedURLByVideoID(ctx, id)
+	videoExtension := metadata.VideoExtension()
+	url, err := v.videoStorageRepository.GetPresignedURLByVideoID(ctx, id, videoExtension.Value())
 	if err != nil {
 		return nil, err
 	}
@@ -79,10 +94,20 @@ func (v *VideoService) GetVideoPage(ctx context.Context, p parameter2.GetVideoPa
 
 	var dtos []dto.GetVideoPageDTO
 	for _, metadata := range pageable.Content() {
+		thUrl, err := v.thumbnailStorageRepository.GetPresignedURLByVideoID(ctx, *(metadata.ID()), metadata.ThumbnailExtension().Value())
+		if err != nil {
+			return nil, err
+		}
 		dtos = append(dtos, dto.GetVideoPageDTO{
-			ID:        metadata.ID().Value(),
-			Title:     metadata.Title().Value(),
-			CreatedAt: metadata.CreatedAt(),
+			ID:           metadata.ID().Value(),
+			Title:        metadata.Title().Value(),
+			Description:  metadata.Description().Value(),
+			ThumbnailURL: thUrl,
+			Views:        metadata.Views(),
+			Likes:        metadata.Likes(),
+			Duration:     metadata.Duration(),
+			Status:       metadata.Status().String(),
+			CreatedAt:    metadata.CreatedAt(),
 		})
 	}
 

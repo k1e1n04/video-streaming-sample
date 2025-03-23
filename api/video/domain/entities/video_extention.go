@@ -33,3 +33,8 @@ func NewVideoExtension(
 func isAllowedExtension(value string) bool {
 	return value == "mp4"
 }
+
+// Value is a getter
+func (v *VideoExtension) Value() string {
+	return v.value
+}

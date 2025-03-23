@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/k1e1n04/video-streaming-sample/api/adapter/infra/records"
 	"github.com/k1e1n04/video-streaming-sample/api/video/domain/entities"
@@ -39,7 +40,16 @@ func (r *VideoMetadataRepositoryImpl) toRecord(video entities.VideoMetadataEntit
 func (r *VideoMetadataRepositoryImpl) toEntity(video records.VideoMetadata) (*entities.VideoMetadataEntity, error) {
 	entity, err := entities.RestoreVideoMetadataEntity(
 		video.ID,
+		video.UserID,
+		video.VideoExtension,
 		video.Title,
+		video.ThumbnailID,
+		video.ThumbnailExtension,
+		video.Description,
+		video.Status,
+		video.Likes,
+		video.Duration,
+		video.Views,
 		video.CreatedAt,
 	)
 	if err != nil {
@@ -55,9 +65,18 @@ func (r *VideoMetadataRepositoryImpl) Register(ctx context.Context, video entiti
 	_, err := r.dynamodbClient.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String(records.VideoMetadataTableName),
 		Item: map[string]types.AttributeValue{
-			"id":         &types.AttributeValueMemberS{Value: record.ID},
-			"title":      &types.AttributeValueMemberS{Value: record.Title},
-			"created_at": &types.AttributeValueMemberS{Value: record.CreatedAt},
+			"id":                  &types.AttributeValueMemberS{Value: record.ID},
+			"title":               &types.AttributeValueMemberS{Value: record.Title},
+			"thumbnail_id":        &types.AttributeValueMemberS{Value: record.ThumbnailID},
+			"thumbnail_extension": &types.AttributeValueMemberS{Value: record.ThumbnailExtension},
+			"video_extension":     &types.AttributeValueMemberS{Value: record.VideoExtension},
+			"user_id":             &types.AttributeValueMemberS{Value: record.UserID},
+			"description":         &types.AttributeValueMemberS{Value: record.Description},
+			"status":              &types.AttributeValueMemberS{Value: record.Status},
+			"likes":               &types.AttributeValueMemberN{Value: strconv.FormatInt(record.Likes, 10)},
+			"views":               &types.AttributeValueMemberN{Value: strconv.FormatInt(record.Views, 10)},
+			"duration":            &types.AttributeValueMemberN{Value: strconv.FormatInt(record.Duration, 10)},
+			"created_at":          &types.AttributeValueMemberS{Value: record.CreatedAt},
 		},
 	})
 	if err != nil {

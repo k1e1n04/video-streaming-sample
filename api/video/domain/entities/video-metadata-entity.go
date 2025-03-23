@@ -44,7 +44,7 @@ func NewVideoMetadataEntity(
 	description string,
 	thumbnailExtension string,
 	duration int64,
-	status string,
+	status VideoStatus,
 	userID models.UserID,
 ) (*VideoMetadataEntity, error) {
 	videoExt, err := NewVideoExtension(videoExtension)
@@ -64,10 +64,6 @@ func NewVideoMetadataEntity(
 	if err != nil {
 		return nil, err
 	}
-	videoStatus, err := NewVideoStatus(status)
-	if err != nil {
-		return nil, err
-	}
 	return &VideoMetadataEntity{
 		id:                 NewVideoID(),
 		videoExtension:     *videoExt,
@@ -76,7 +72,7 @@ func NewVideoMetadataEntity(
 		description:        *videoDesc,
 		thumbnailID:        thumbnailID,
 		thumbnailExtension: *thumbnailExt,
-		status:             videoStatus,
+		status:             status,
 		views:              0,
 		likes:              0,
 		duration:           duration,
@@ -172,9 +168,14 @@ func (v *VideoMetadataEntity) UserID() models.UserID {
 	return v.userID
 }
 
+// VideoExtension is a getter
+func (v *VideoMetadataEntity) VideoExtension() *VideoExtension {
+	return &v.videoExtension
+}
+
 // Description is a getter
-func (v *VideoMetadataEntity) Description() VideoDescription {
-	return v.description
+func (v *VideoMetadataEntity) Description() *VideoDescription {
+	return &v.description
 }
 
 // ThumbnailID is a getter
@@ -183,8 +184,8 @@ func (v *VideoMetadataEntity) ThumbnailID() ThumbnailID {
 }
 
 // ThumbnailExtension is a getter
-func (v *VideoMetadataEntity) ThumbnailExtension() ThumbnailExtension {
-	return v.thumbnailExtension
+func (v *VideoMetadataEntity) ThumbnailExtension() *ThumbnailExtension {
+	return &v.thumbnailExtension
 }
 
 // Views is a getter
