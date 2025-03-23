@@ -1,14 +1,14 @@
 package errors
 
-// NotFoundError is an error for not found request
-type NotFoundError struct {
+// UnauthorizedError is an error for unauthorized request
+type UnauthorizedError struct {
 	DebugMessage string
 	FrontMessage string
 	Cause        error
 }
 
-// NewNotFoundError is a constructor
-func NewNotFoundError(
+// NewUnauthorizedError is a constructor
+func NewUnauthorizedError(
 	debugMessage string,
 	frontMessage string,
 	cause error,
@@ -21,6 +21,6 @@ func NewNotFoundError(
 }
 
 // Error returns an error message
-func (e *NotFoundError) Error() string {
+func (e *UnauthorizedError) Error() string {
 	return e.FrontMessage
 }
