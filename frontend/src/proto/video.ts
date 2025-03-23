@@ -199,6 +199,7 @@ export namespace video {
             extension?: string;
             duration?: number;
             thumbnailExtension?: string;
+            status?: VideoStatus;
           },
     ) {
       super();
@@ -228,6 +229,9 @@ export namespace video {
           data.thumbnailExtension != undefined
         ) {
           this.thumbnailExtension = data.thumbnailExtension;
+        }
+        if ("status" in data && data.status != undefined) {
+          this.status = data.status;
         }
       }
     }
@@ -261,12 +265,23 @@ export namespace video {
     set thumbnailExtension(value: string) {
       pb_1.Message.setField(this, 5, value);
     }
+    get status() {
+      return pb_1.Message.getFieldWithDefault(
+        this,
+        6,
+        VideoStatus.PENDING,
+      ) as VideoStatus;
+    }
+    set status(value: VideoStatus) {
+      pb_1.Message.setField(this, 6, value);
+    }
     static fromObject(data: {
       title?: string;
       description?: string;
       extension?: string;
       duration?: number;
       thumbnailExtension?: string;
+      status?: VideoStatus;
     }): VideoMetadata {
       const message = new VideoMetadata({});
       if (data.title != null) {
@@ -284,6 +299,9 @@ export namespace video {
       if (data.thumbnailExtension != null) {
         message.thumbnailExtension = data.thumbnailExtension;
       }
+      if (data.status != null) {
+        message.status = data.status;
+      }
       return message;
     }
     toObject() {
@@ -293,6 +311,7 @@ export namespace video {
         extension?: string;
         duration?: number;
         thumbnailExtension?: string;
+        status?: VideoStatus;
       } = {};
       if (this.title != null) {
         data.title = this.title;
@@ -309,6 +328,9 @@ export namespace video {
       if (this.thumbnailExtension != null) {
         data.thumbnailExtension = this.thumbnailExtension;
       }
+      if (this.status != null) {
+        data.status = this.status;
+      }
       return data;
     }
     serialize(): Uint8Array;
@@ -321,6 +343,7 @@ export namespace video {
       if (this.duration != 0) writer.writeInt64(4, this.duration);
       if (this.thumbnailExtension.length)
         writer.writeString(5, this.thumbnailExtension);
+      if (this.status != VideoStatus.PENDING) writer.writeEnum(6, this.status);
       if (!w) return writer.getResultBuffer();
     }
     static deserialize(bytes: Uint8Array | pb_1.BinaryReader): VideoMetadata {
@@ -346,6 +369,9 @@ export namespace video {
             break;
           case 5:
             message.thumbnailExtension = reader.readString();
+            break;
+          case 6:
+            message.status = reader.readEnum();
             break;
           default:
             reader.skipField();
